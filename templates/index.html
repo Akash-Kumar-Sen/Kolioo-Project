@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload Music</title>
+</head>
+<body>
+  <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    }
+
+    h1 {
+    margin-top: 50px;
+    text-align: center;
+    }
+
+    #upload-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    }
+
+    #file-input {
+    margin-bottom: 10px;
+    }
+
+    #submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+
+    #metadata {
+    margin-top: 50px;
+    text-align: center;
+    }
+
+  </style>
+  <h1>Upload Music</h1>
+  <div id="upload-form">
+    <input type="file" id="file-input">
+    <button id="submit-btn">Upload</button>
+  </div>
+  <div id="metadata"></div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    // Get the JWT token from local storage
+    const token = "";
+
+    // Add the token to the request headers
+    const headers = {
+    'Authorization': `Bearer ${token}`
+    };
+
+    // Get the file input and submit button
+    const fileInput = document.getElementById('file-input');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // Get the metadata container
+    const metadataContainer = document.getElementById('metadata');
+
+    // When the user selects a file, enable the submit button
+    fileInput.addEventListener('change', () => {
+    submitBtn.disabled = false;
+    });
+
+    // When the user submits the form, upload the file and retrieve its metadata
+    submitBtn.addEventListener('click', () => {
+    // Disable the submit button to prevent multiple uploads
+    submitBtn.disabled = true;
+
+    // Get the file object
+    const file = fileInput.files[0];
+
+    // Create a new FormData object and append the file to it
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Send a POST request to the backend API to upload the file
+    axios.post('http://localhost:8000/api/v1/audio/', formData, { headers })
+        .then(response => {
+        // Display the metadata in the metadata container
+        metadataContainer.innerHTML = `
+            <p><strong>Title:</strong> ${response.data.title || 'NA'}</p>
+            <p><strong>File type:</strong> ${response.data.file_type || 'NA'}</p>
+            <p><strong>Genre:</strong> ${response.data.genre || 'NA'}</p>
+            <p><strong>Audio length:</strong> ${response.data.audio_length || 'NA'}</p>
+            <p><strong>File size:</strong> ${response.data.file_size || 'NA'}</p>
+        `;
+        })
+        .catch(error => {
+        // Display an error message
+        metadataContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+        });
+    });
+
+  </script>
+</body>
+</html>
